@@ -15,7 +15,6 @@ items.push({ ID: '17',  TYPE: 'GPIO', Name: 'Waschraum', DIRECTION:'Output'});
 items.push({ ID: '23',  TYPE: 'GPIO', Name: 'Sauna', DIRECTION:'Output'});
 items.push({ ID: '24',  TYPE: 'GPIO', Name: 'Groß', DIRECTION:'Output'});
 
-const GPIOs = [];
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
@@ -23,9 +22,9 @@ for(var i = 0; i < items.length; i++) {
 	if(items[i].TYPE == 'GPIO') {
 		console.log(items[i].ID + ' get\'s exported');
 		if(items[i].DIRECTION == 'Input') {
-			GPIOs[items[i].ID] = new Gpio(items[i].ID, 'in', 'both');
+			items[i].GPIO = new Gpio(items[i].ID, 'in', 'both');
 			console.log(items[i].ID + ' get\'s watched');
-			GPIOs[items[i].ID].watch(function (err, value, gpio) {
+			items[i].GPIO.watch(function (err, value, gpio) {
 				if (err) {
 					throw err;
 					}
@@ -33,18 +32,18 @@ for(var i = 0; i < items.length; i++) {
 				eventEmitter.emit('GPIO state changed', gpio, value);
 			});
 		} else {
-			GPIOs[items[i].ID] = new Gpio(items[i].ID, 'out');
+			items[i].GPIO = new Gpio(items[i].ID, 'out');
 		}
 	}
 }
 var test = new Server(items, eventEmitter);
-var scripts = new Scripts(items, eventEmitter, GPIOs);
+var scripts = new Scripts(items, eventEmitter);
 
 process.on('SIGINT', function () {
 	for(var i = 0; i < items.length; i++) {
 		if(items[i].TYPE == 'GPIO') {
 			console.log(items[i].ID + " unexported");
-			GPIOs[items[i].ID].unexport();
+			items[i].GPIO.unexport();
 		}
 	}
 	process.exit();

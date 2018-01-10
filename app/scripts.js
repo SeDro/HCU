@@ -1,99 +1,74 @@
 "use strict";
-var Timer = [];
 
 class Scripts{
-	constructor(items, eventEmitter, GPIOs) {
+	constructor(items, eventEmitter) {
         this.items = items;
-        this.GPIOs = GPIOs;
 		eventEmitter.on('GPIO state changed', function (gpio, value) {
 			if(value == 0) {
-				for(var i = 0; i < items.length; i++) {
-					if(items[i].TYPE == 'GPIO' && items[i].ID == gpio) {
-						if(typeof items[i].Date !== undefined && items[i].Date >= Date.now() - 200) return;
-						items[i].Date = Date.now();
-					}
-				}
-				var _setTimer = false;
-				var targetGPIO;
-				switch(gpio) {
+				var item = items.find(item => item.TYPE == 'GPIO' && item.ID == gpio);
+
+				if(typeof item.DATE !== undefined && item.DATE >= Date.now() - 200) return;
+
+				var output_item;
+				switch(item.ID) {
 					case '2':
-						targetGPIO = GPIOs['17'];
+						output_item = items.find(item => item.ID == '17');
 						break;
 					case '25':
-						targetGPIO = GPIOs['23'];
+						output_item = items.find(item => item.ID == '23');
 						break;
 					default:
 						console.log("Unknown Input change " + gpio);
 				}
-	
-				var tmp = targetGPIO.readSync();
-				_setTimer = tmp == 0;
-				targetGPIO.writeSync( tmp ^ 1);
-				
-				if(_setTimer) Timer[gpio] = setTimeout(deactivateGPIO, 30 * 60 * 1000, targetGPIO);
-				else if(typeof Timer[gpio] !== undefined) clearTimeout(Timer[gpio]);
+				item.DATE = Date.now();
+				if(typeof output_item !== undefined && !activateGPIOandSetTimer(output_item)) deactivateGPIO(output_item);
 			}
 		});
 		eventEmitter.on('Item updated', function (index) {
 			var tmp = new Date();
 			var time = tmp.getHours();
-			if(time >= 0 && time <= 3 && items[index].TYPE == 'Humidity/Temp') {
-				if(items[index].ID == '44') {
-					console.log('aussen updated to '+items[index].Humidity_Abs);
-					for(var i = 0; i < items.length; i++) {
-						if(typeof items[i].Humidity_Abs != undefined) {
-							if(items[i].ID == '4' && items[i].Humidity_Abs >= items[index].Humidity_Abs) {
-								var targetGPIO = GPIOs['24'];
-								targetGPIO.writeSync(1);
-								if(typeof Timer['4'] !== undefined) clearTimeout(Timer['4']);
-								Timer['4'] = setTimeout(deactivateGPIO, 30 * 60 * 1000, targetGPIO);;
-							}
-							if(items[i].ID == '60' && items[i].Humidity_Abs >= items[index].Humidity_Abs) {
-								var targetGPIO = GPIOs['17'];
-								targetGPIO.writeSync(1);
-								if(typeof Timer['60'] !== undefined) clearTimeout(Timer['60']);
-								Timer['60'] = setTimeout(deactivateGPIO, 30 * 60 * 1000, targetGPIO);;
-							}
-							if(items[i].ID == '32' && items[i].Humidity_Abs >= items[index].Humidity_Abs) {
-								var targetGPIO = GPIOs['23'];
-								targetGPIO.writeSync(1);
-								if(typeof Timer['32'] !== undefined) clearTimeout(Timer['32']);
-								Timer['32'] = setTimeout(deactivateGPIO, 30 * 60 * 1000, targetGPIO);;
-							}
-						}
-					}
-				} else {
-					var aussen = items.find(function (item) {return item.ID == '44'});
-					if(typeof aussen.Humidity_Abs != undefined && aussen.Humidity_Abs <= items[index].Humidity_Abs) {
-						console.log(items[index].ID.toString() + 'updated: ' + items[index].Humidity_Abs.toString() + ' aussen: ' + aussen.Humidity_Abs.toString());
-						var targetGPIO;
-						switch(items[index].ID) {
+			if(time >= 0 && time <= 3 && items[index].TYPE == 'Humidity/Temp' && items[index].ID == '44') {
+				for(var i = 0; i < items.length; i++) {
+					if(typeof items[i].Humidity_Abs !== undefined && items[i].Humidity_Abs >= items[index].Humidity_Abs) {
+						switch (items[i].ID) {
 							case '4':
-								targetGPIO = GPIOs['24'];
-								console.log('24 activate');
+								activateGPIOandSetTimer(items.find(item => item.ID == '24'));
 								break;
 							case '60':
-								targetGPIO = GPIOs['17'];
-								console.log('17 activate');
+								activateGPIOandSetTimer(items.find(item => item.ID == '17'));
 								break;
 							case '32':
-								targetGPIO = GPIOs['23'];
-								console.log('23 activate');
+								activateGPIOandSetTimer(items.find(item => item.ID == '23'));
 								break;
 						}
-						console.log('targetGPIO activate');
-						targetGPIO.writeSync(1);
-						if(typeof Timer[items[index].ID] !== undefined) clearTimeout(Timer[items[index].ID]);
-						Timer[items[index].ID] = setTimeout(deactivateGPIO, 30 * 60 * 1000, targetGPIO);;
 					}
 				}
 			}
 		});
+		eventEmitter.on('Item updated', function (index) {
+			if(items[index].TYPE == 'GPIO')
+				if items[index].DIRECTION == 'Output') {
+					if(items[index].VALUE !== undefined && items[index].VALUE == '1') activateGPIOandSetTimer(items[index])
+					else deactivateGPIO(items[index]);
+				} else {
+					eventEmitter.emit('GPIO state changed', items[index].ID, items[index].VALUE);
+				}
+		});
+
 	}
 }
-
-function deactivateGPIO(targetGPIO) {
-	targetGPIO.writeSync(0);
+function activateGPIOandSetTimer(item) {
+	if(item.GPIO.readSync() == 0) {
+		item.GPIO.writeSync(1);
+		if(typeof item.Timer !== undefined) clearTimeout(item.Timer);
+		item.Timer = setTimeout(deactivateGPIO, 30 * 60 * 1000, item);
+		return true;
+	}
+	return false;
+}
+function deactivateGPIO(item) {
+	if(typeof item.Timer !== undefined) clearTimeout(item.Timer);
+	item.GPIO.writeSync(0);
 }
 
 module.exports = Scripts;
