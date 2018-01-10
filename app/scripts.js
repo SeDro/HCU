@@ -47,7 +47,7 @@ class Scripts{
 		});
 		eventEmitter.on('Item updated', function (index) {
 			if(items[index].TYPE == 'GPIO')
-				if items[index].DIRECTION == 'Output') {
+				if (items[index].DIRECTION == 'Output') {
 					if(items[index].VALUE !== undefined && items[index].VALUE == '1') activateGPIOandSetTimer(items[index])
 					else deactivateGPIO(items[index]);
 				} else {
