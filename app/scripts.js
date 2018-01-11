@@ -4,25 +4,11 @@ class Scripts{
 	constructor(items, eventEmitter) {
         this.items = items;
 		eventEmitter.on('GPIO state changed', function (gpio, value) {
-			if(value == 0) {
-				var item = items.find(item => item.TYPE == 'GPIO' && item.ID == gpio);
-
-				if(typeof item.DATE !== undefined && item.DATE >= Date.now() - 200) return;
-
-				var output_item;
-				switch(item.ID) {
-					case '2':
-						output_item = items.find(item => item.ID == '17');
-						break;
-					case '25':
-						output_item = items.find(item => item.ID == '23');
-						break;
-					default:
-						console.log("Unknown Input change " + gpio);
-				}
-				item.DATE = Date.now();
-				if(typeof output_item !== undefined && !activateGPIOandSetTimer(output_item)) deactivateGPIO(output_item);
-			}
+			var item = items.find(item => item.TYPE == 'GPIO' && item.ID == gpio);
+			if(typeof item.DATE !== undefined && item.DATE >= Date.now() - 200) return;
+			item.DATE = Date.now();
+			item.VALUE = value;
+			eventEmitter.emit('Item updated', items.indexOf(item));
 		});
 		eventEmitter.on('Item updated', function (index) {
 			var tmp = new Date();
@@ -32,13 +18,13 @@ class Scripts{
 					if(typeof items[i].Humidity_Abs !== undefined && items[i].Humidity_Abs >= items[index].Humidity_Abs) {
 						switch (items[i].ID) {
 							case '4':
-								activateGPIOandSetTimer(items.find(item => item.ID == '24'));
+								activateGPIOandSetTimer(items.find(item => item.ID == '24'), false);
 								break;
 							case '60':
-								activateGPIOandSetTimer(items.find(item => item.ID == '17'));
+								activateGPIOandSetTimer(items.find(item => item.ID == '17'), false);
 								break;
 							case '32':
-								activateGPIOandSetTimer(items.find(item => item.ID == '23'));
+								activateGPIOandSetTimer(items.find(item => item.ID == '23'), false);
 								break;
 						}
 					}
@@ -48,17 +34,28 @@ class Scripts{
 		eventEmitter.on('Item updated', function (index) {
 			if(items[index].TYPE == 'GPIO')
 				if (items[index].DIRECTION == 'Output') {
-					if(items[index].VALUE !== undefined && items[index].VALUE == '1') activateGPIOandSetTimer(items[index])
+					if(items[index].VALUE !== undefined && items[index].VALUE == '1') activateGPIOandSetTimer(items[index], true)
 					else deactivateGPIO(items[index]);
-				} else {
-					eventEmitter.emit('GPIO state changed', items[index].ID, items[index].VALUE);
+				} else if(items[index].VALUE == 0) {
+					var item;
+					switch(items[index].ID) {
+						case '2':
+							item = items.find(item => item.ID == '17');
+							break;
+						case '25':
+							item = items.find(item => item.ID == '23');
+							break;
+						default:
+							console.log("Unknown Input change " + gpio);
+					}
+					if(typeof item !== undefined && !activateGPIOandSetTimer(item), false) deactivateGPIO(item);
 				}
 		});
 
 	}
 }
-function activateGPIOandSetTimer(item) {
-	if(item.GPIO.readSync() == 0) {
+function activateGPIOandSetTimer(item, always) {
+	if(item.GPIO.readSync() == 0 || always) {
 		item.GPIO.writeSync(1);
 		if(typeof item.Timer !== undefined) clearTimeout(item.Timer);
 		item.Timer = setTimeout(deactivateGPIO, 30 * 60 * 1000, item);

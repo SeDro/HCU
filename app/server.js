@@ -24,6 +24,7 @@ class Server{
 						break;
 					case 'GPIO':
 						items[i].VALUE = new_input.VALUE;
+						if(items[i].DIRECTION == 'Output') items[i].GPIO.writeSync(items[i].VALUE);
 						break;
 					}
 					console.log('Item updated ' + i);
