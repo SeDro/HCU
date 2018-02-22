@@ -11,3 +11,10 @@ exports.createItem = (item) => {
     item
   }
 }
+
+exports.deleteItem = (item) => {
+  return {
+    type: 'DELETE_ITEM',
+    item
+  }
+}

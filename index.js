@@ -7,6 +7,7 @@ var tmp = 0;
 console.log('Starting initialisation');
 
 const store = new Store();
+/*
 store.dispatch(actions.createItem({ ID: '2',  TYPE: 'GPIO_push_button', Name: 'Waschraum'}));
 store.dispatch(actions.createItem({ ID: '44',  TYPE: 'Humidity_Temp', Name: 'Außen'}));
 store.dispatch(actions.createItem({ ID: '4',  TYPE: 'Humidity_Temp', Name: 'Groß'}));
@@ -21,6 +22,7 @@ store.dispatch(actions.createItem({ ID: '2',  TYPE: 'Script', Name: 'button_saun
 store.dispatch(actions.createItem({ ID: '3',  TYPE: 'Script', Name: 'humidity_groß', Trigger: [{Name: 'Außen', TYPE: 'Humidity_Temp'}, {Name: 'Groß', TYPE: 'Humidity_Temp'}]}));
 store.dispatch(actions.createItem({ ID: '4',  TYPE: 'Script', Name: 'humidity_spiel', Trigger: [{Name: 'Außen', TYPE: 'Humidity_Temp'}, {Name: 'Spiel', TYPE: 'Humidity_Temp'}]}));
 store.dispatch(actions.createItem({ ID: '5',  TYPE: 'Script', Name: 'humidity_waschraum', Trigger: [{Name: 'Außen', TYPE: 'Humidity_Temp'}, {Name: 'Waschraum', TYPE: 'Humidity_Temp'}]}));
+*/
 
 const test = new Server(store);
 

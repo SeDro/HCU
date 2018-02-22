@@ -37,7 +37,7 @@ module.exports = class Script extends item_base{
 	}
 
 	serialize() {
-		var tmp = super.serialze();
+		var tmp = super.serialize();
 		tmp.Trigger = this.Trigger;
 		return tmp;
 	}

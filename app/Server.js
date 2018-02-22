@@ -29,8 +29,8 @@ class Server{
 			res.json(output_items);
 		});
 		
-		app.get('/item/:id', (req, res) => {
-			var item = this._store.state.find(item => item.ID == req.params.id);
+		app.get('/item/:type/:name', (req, res) => {
+			var item = this._store.state.find(item => item.TYPE == req.params.type && item.Name == req.params.name);
 			if(item !== undefined) {
 				res.json(item.user_detailed_view());
 			}

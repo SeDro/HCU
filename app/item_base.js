@@ -11,10 +11,11 @@ module.exports = class item_base {
 	}
 	
 	user_detailed_view() {
-		return this.persistentInformation();
+		return this.serialize();
 	}
 	
 	dispose() {
+		this.callbacks = undefined;
 	};
 	
 	update(item) {
