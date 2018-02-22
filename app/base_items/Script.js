@@ -21,6 +21,7 @@ module.exports = class Script extends item_base{
 			for(var i = 0; i < this._unsubscribers.length; i++) {
 				this._unsubscribers[i]();
 			}
+			delete this._unsubscribers;
 		}
 	}
 	
@@ -30,6 +31,7 @@ module.exports = class Script extends item_base{
 	
 	dispose() {
 		this.active = false;
+		super.dispose();
 	}
 	
 	execute() {
@@ -41,4 +43,9 @@ module.exports = class Script extends item_base{
 		tmp.Trigger = this.Trigger;
 		return tmp;
 	}
-}
+	
+	user_detailed_view() {
+		var tmp = super.user_detailed_view();
+		tmp.active = this.active;
+		return tmp;
+	}}

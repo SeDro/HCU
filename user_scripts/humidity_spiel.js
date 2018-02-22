@@ -7,7 +7,7 @@ exports.run = (store) => {
 		var item_in = store.state.find(item => item.TYPE == "Humidity_Temp" && item.Name == "Spiel");
 		var item_out = store.state.find(item => item.TYPE == "Humidity_Temp" && item.Name == "Außen");
 		if(time >= 0 && time <= 3) {
-			if(typeof item_in.Humidity_Abs !== undefined && typeof items_out.Humidity_Abs !== undefined && item_in.Humidity_Abs >= item_out.Humidity_Abs) {
+			if(typeof item_in.Humidity_Abs !== undefined && typeof item_out.Humidity_Abs !== undefined && item_in.Humidity_Abs >= item_out.Humidity_Abs) {
 				var item = store.state.find(item => item.TYPE == "GPIO_output" && item.Name == "Sauna");
 				store.dispatch(actions.updateItem({ID: item.ID, TYPE: item.TYPE, VALUE: 1 }));
 				setTimeout(()=> {

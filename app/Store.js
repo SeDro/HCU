@@ -59,7 +59,7 @@ module.exports = class Store {
 	}
 	
 	dispose() {
-		for(var i = 0; i < this._state.length; i++) {
+		for(var i = this._state.length - 1; i >= 0; i--) {
 			this._state[i].dispose();
 		}
 	}
