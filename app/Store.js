@@ -9,6 +9,7 @@ module.exports = class Store {
 		this._state = [];
 		this.callbacks = [];
 		this._persistence = [];
+		this.createDefaultItems();
 		this.loadPersistence();
 	}
 	
@@ -94,5 +95,12 @@ module.exports = class Store {
 				}
 			}
 		}
+	}
+	
+	createDefaultItems() {
+		this._state.push(this.Factory.createItem({ID: '1', TYPE: 'DATE', Name: 'Second'}, this));
+		this._state.push(this.Factory.createItem({ID: '2', TYPE: 'DATE', Name: 'Minute'}, this));
+		this._state.push(this.Factory.createItem({ID: '3', TYPE: 'DATE', Name: 'Hour'}, this));
+		this._state.push(this.Factory.createItem({ID: '4', TYPE: 'DATE', Name: 'Day'}, this));
 	}
 }
