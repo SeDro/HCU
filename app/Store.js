@@ -5,10 +5,15 @@ var actions = require('./actions');
 
 module.exports = class Store {
 	constructor () {
+		this.init();
+	}
+	
+	init() {
 		this.Factory = new itemFactory();
 		this._state = [];
 		this.callbacks = [];
 		this._persistence = [];
+		this._defaultTypes = [];
 		this.createDefaultItems();
 		this.loadPersistence();
 	}
@@ -102,5 +107,15 @@ module.exports = class Store {
 		this._state.push(this.Factory.createItem({ID: '2', TYPE: 'DATE', Name: 'Minute'}, this));
 		this._state.push(this.Factory.createItem({ID: '3', TYPE: 'DATE', Name: 'Hour'}, this));
 		this._state.push(this.Factory.createItem({ID: '4', TYPE: 'DATE', Name: 'Day'}, this));
+		this._defaultTypes.push('DATE');
+	}
+	
+	get defaultTypes() {
+		return this._defaultTypes;
+	}
+	
+	reInit() {
+		this.dispose();
+		this.init();
 	}
 }

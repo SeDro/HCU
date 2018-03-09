@@ -22,9 +22,12 @@ class Server{
 		
 		app.get('/items', (req, res) => {
 			let output_items = [];
+			let defaultTypes = this._store.defaultTypes;
 			for(var index = 0; index < this._store.state.length; index ++) {
 				var tmp = this._store.state[index];
-				output_items.push({ TYPE: tmp.TYPE, Name: tmp.Name});
+				if(!defaultTypes.includes(tmp.TYPE)) {
+					output_items.push({ TYPE: tmp.TYPE, Name: tmp.Name});
+				}
 			}
 			res.json(output_items);
 		});
